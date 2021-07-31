@@ -94,7 +94,7 @@ function init_sock() {
 function reconnect_sock() {
   while (true) {
     try {
-      ws = new WebSocket("wss://annon-sock.glitch.me");
+      ws = new WebSocket("wss://annon-sock.glitch.me/");
       init_sock();
       break;
     } catch {
