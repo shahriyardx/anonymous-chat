@@ -1,5 +1,3 @@
-import style, { appendMessage, wait } from './cul'
-
 const online_span = document.querySelector(".online");
 const form = document.querySelector(".msger-inputarea");
 const cover = document.querySelector(".cover");

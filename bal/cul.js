@@ -1,4 +1,4 @@
-export default function style(message) {
+function style(message) {
   let frags = message.split(":");
 
   switch (frags[0]) {
@@ -74,7 +74,7 @@ export default function style(message) {
   }
 }
 
-export function wait(time) {
+function wait(time) {
   return new Promise(resolve => {
     setTimeout(() => {
       resolve("");
@@ -82,7 +82,7 @@ export function wait(time) {
   });
 }
 
-export function appendMessage(side, text, name, set) {
+function appendMessage(side, text, name, set) {
   const messages = document.querySelector(".msger-chat");
   const msgHTML = `
       <div class="msg ${side}-msg">
