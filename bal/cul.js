@@ -22,7 +22,7 @@ function style(message) {
       return `<span style="color: ${code}">${text}</span>`;
 
     case "ud":
-      text = frags[1];
+      let text = frags[1];
       if (!text) {
         return message;
       }
@@ -33,7 +33,7 @@ function style(message) {
         .join("")}</div>`;
 
     case "rev":
-      text = frags[1];
+      let text = frags[1];
       if (!text) {
         return message;
       }
@@ -44,7 +44,7 @@ function style(message) {
         .join("");
 
     case "pd":
-      text = frags[1];
+      let text = frags[1];
       if (!text) {
         return message;
       }
@@ -58,7 +58,7 @@ function style(message) {
       );
 
     case "pdr":
-      text = frags[1];
+      let text = frags[1];
       if (!text) {
         return message;
       }
