@@ -73,3 +73,39 @@ export default function style(message) {
       return message;
   }
 }
+
+export function wait(time) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      resolve("");
+    }, time);
+  });
+}
+
+export function appendMessage(side, text, name, set) {
+  const messages = document.querySelector(".msger-chat");
+  const msgHTML = `
+      <div class="msg ${side}-msg">
+        <div class="msg-img" style="background-image: url(https://robohash.org/${name}?size=30x30&set=${set})"></div>
+  
+        <div class="msg-bubble">
+          <div class="msg-info">
+            <div class="msg-info-name">Anonymous</div>
+            <div class="msg-info-time">${formatDate(new Date())}</div>
+          </div>
+  
+          <div class="msg-text">${text}</div>
+        </div>
+      </div>
+    `;
+
+  messages.insertAdjacentHTML("beforeend", msgHTML);
+  messages.scrollTop += 500;
+}
+
+function formatDate(date) {
+  const h = "0" + date.getHours();
+  const m = "0" + date.getMinutes();
+
+  return `${h.slice(-2)}:${m.slice(-2)}`;
+}

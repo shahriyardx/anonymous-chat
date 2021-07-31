@@ -127,6 +127,19 @@
     src="https://kit.fontawesome.com/e8869efb0b.js"
     crossorigin="anonymous"
   ></script>
-  <script src="bal/cul.js"></script>
   <script src="bal/bal.js"></script>
+  <script>
+    function toggleSound() {
+      const volume_button = document.querySelector(".volume");
+      sound = !sound;
+
+      if (!sound) {
+        volume_button.classList.remove("fa-volume-up");
+        volume_button.classList.add("fa-volume-mute");
+      } else {
+        volume_button.classList.add("fa-volume-up");
+        volume_button.classList.remove("fa-volume-mute");
+      }
+    }
+  </script>
 </html>

@@ -1,11 +1,11 @@
+import style, { appendMessage, wait } from './cul'
+
 const online_span = document.querySelector(".online");
-const messages = document.querySelector(".msger-chat");
 const form = document.querySelector(".msger-inputarea");
 const cover = document.querySelector(".cover");
 const google_event = new Audio("https://cdn.shahriyar.dev/google_event.mp3");
 const incoming= new Audio("https://cdn.shahriyar.dev/incoming.mp3");
 const outgoing = new Audio("https://cdn.shahriyar.dev/outgoing.mp3");
-const volume_button = document.querySelector(".volume");
 
 google_event.volume = 0.2;
 incoming.volume = 0.2;
@@ -18,25 +18,11 @@ let ws;
 
 let unread_count = 0;
 
-import style from './cul'
-
 try {
   ws = new WebSocket("wss://annon-sock.glitch.me");
   init_sock();
 } catch {
   reconnect_sock();
-}
-
-function toggleSound() {
-  sound = !sound;
-
-  if (!sound) {
-    volume_button.classList.remove("fa-volume-up");
-    volume_button.classList.add("fa-volume-mute");
-  } else {
-    volume_button.classList.add("fa-volume-up");
-    volume_button.classList.remove("fa-volume-mute");
-  }
 }
 
 function init_sock() {
@@ -107,14 +93,6 @@ function init_sock() {
   });
 }
 
-function wait(time) {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      resolve("");
-    }, time);
-  });
-}
-
 function reconnect_sock() {
   while (true) {
     try {
@@ -127,13 +105,6 @@ function reconnect_sock() {
   }
 }
 
-function formatDate(date) {
-  const h = "0" + date.getHours();
-  const m = "0" + date.getMinutes();
-
-  return `${h.slice(-2)}:${m.slice(-2)}`;
-}
-
 function send_message(message) {
   if (message !== "") {
     ws.send(
@@ -144,26 +115,6 @@ function send_message(message) {
       })
     );
   }
-}
-
-function appendMessage(side, text, name, set) {
-  const msgHTML = `
-      <div class="msg ${side}-msg">
-        <div class="msg-img" style="background-image: url(https://robohash.org/${name}?size=30x30&set=${set})"></div>
-  
-        <div class="msg-bubble">
-          <div class="msg-info">
-            <div class="msg-info-name">Anonymous</div>
-            <div class="msg-info-time">${formatDate(new Date())}</div>
-          </div>
-  
-          <div class="msg-text">${text}</div>
-        </div>
-      </div>
-    `;
-
-  messages.insertAdjacentHTML("beforeend", msgHTML);
-  messages.scrollTop += 500;
 }
 
 form.addEventListener("submit", e => {
