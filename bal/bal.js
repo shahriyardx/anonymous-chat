@@ -4,17 +4,20 @@ const cover = document.querySelector(".cover");
 const google_event = new Audio("https://cdn.shahriyar.dev/google_event.mp3");
 const incoming= new Audio("https://cdn.shahriyar.dev/incoming.mp3");
 const outgoing = new Audio("https://cdn.shahriyar.dev/outgoing.mp3");
+const typing = document.querySelector('.typing')
 
 google_event.volume = 0.2;
 incoming.volume = 0.2;
 outgoing.volume = 0.2;
 
 const default_title = document.title;
-let sound = true;
 let identifier;
 let ws;
 
 let unread_count = 0;
+let channel = "";
+let sound = true;
+let typing_count = 0;
 
 try {
   ws = new WebSocket("wss://annon-sock.glitch.me");
@@ -53,8 +56,29 @@ function init_sock() {
       case "con":
         identifier = data["identifier"];
         break;
-
+      
+      case "typing":
+        if (data["channel"] != channel) {
+          return
+        }
+        
+        typing_count = data["users"].length
+        users = data["users"]
+        if(users.includes(identifier) && typing_count == 1) {
+          typing.textContent = ""
+        } else if (typing_count == 0) {
+          typing.textContent = ""
+        } else {
+          let is_are = typing_count > 1 ? "are" : "is"
+          typing.textContent = `${typing_count} people ${is_are} typing...`
+        }
+        console.log(typing_count, typeof typing_count)
+        break;
       case "message":
+        if (data["channel"] != channel) {
+          return
+        }
+
         let message = data["message"].replace(/(<([^>]+)>)/gi, "");
         let side = "left";
 
@@ -109,7 +133,8 @@ function send_message(message) {
       JSON.stringify({
         event: "message",
         message: message,
-        identifier: identifier
+        identifier: identifier,
+        channel: channel
       })
     );
   }
@@ -159,12 +184,39 @@ window.addEventListener("focus", e => {
   unread_count = 0;
 });
 
+function debounce(callback, wait) {
+  let timeout;
+  return (...args) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(function () { callback.apply(this, args); }, wait);
+  };
+}
+
+form.message.addEventListener('keydown', debounce((e) => {
+  ws.send(
+    JSON.stringify({
+      event: "typing_stop",
+      identifier: identifier,
+      channel: channel
+    })
+  );
+}, 2000))
+
+
 form.message.addEventListener("keyup", e => {
   let text = e.target.value;
 
   if (e.keyCode == 8) {
     return;
   }
+
+  ws.send(
+    JSON.stringify({
+      event: "typing_start",
+      identifier: identifier,
+      channel: channel
+    })
+  );
 
   switch (text) {
     case "color":
