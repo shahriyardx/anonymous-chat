@@ -69,7 +69,7 @@ function init_sock() {
         } else if (typing_count == 0) {
           typing.textContent = ""
         } else {
-          users.includes(identifier) ? user.remove(identifier) : null
+          users.includes(identifier) ? users.remove(identifier) : null
           users.includes(identifier) ? typing_count -= 1 : null
 
           let is_are = typing_count > 1 ? "are" : "is"
