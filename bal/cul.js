@@ -1,20 +1,20 @@
 function style(message) {
-  let frags = message.split(":");
+   var frags = message.split(":");
 
   switch (frags[0]) {
     case "img":
-      let has_source = frags[1];
+      has_source = frags[1];
       if (!has_source) {
         return message;
       }
 
-      let src = frags.splice(1).join(":");
+      src = frags.splice(1).join(":");
 
       return `<img src="${src}" style="max-width:100%;height:auto;">`;
 
     case "color":
-      let code = frags[1];
-      let text = frags[2];
+      code = frags[1];
+      text = frags[2];
 
       if (!code || !text) {
         return message;
@@ -22,7 +22,7 @@ function style(message) {
       return `<span style="color: ${code}">${text}</span>`;
 
     case "ud":
-      let text = frags[1];
+      text = frags[1];
       if (!text) {
         return message;
       }
@@ -33,7 +33,7 @@ function style(message) {
         .join("")}</div>`;
 
     case "rev":
-      let text = frags[1];
+      text = frags[1];
       if (!text) {
         return message;
       }
@@ -44,7 +44,7 @@ function style(message) {
         .join("");
 
     case "pd":
-      let text = frags[1];
+      text = frags[1];
       if (!text) {
         return message;
       }
@@ -58,7 +58,7 @@ function style(message) {
       );
 
     case "pdr":
-      let text = frags[1];
+      text = frags[1];
       if (!text) {
         return message;
       }

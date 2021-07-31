@@ -153,13 +153,15 @@ form.addEventListener("submit", e => {
   let frags = message.split(":");
 
   if (["color", "ud", "pd", "rev", "img"].includes(frags[0])) {
+    let code;
+    let text;
     switch (frags[0]) {
       case "img":
         form.message.value = "img:";
         break;
       case "color":
-        let code = frags[1];
-        let text = frags[2];
+        code = frags[1];
+        text = frags[2];
 
         if (!code || !text) {
           form.message.value = "";
