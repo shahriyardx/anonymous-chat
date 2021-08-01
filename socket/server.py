@@ -11,7 +11,7 @@ i_sock = {}
 typing_users = {}
 blacklisted_ip = ["144.172.120.190"] # ip you dont want to be a client
 allowed_origins = ["chat.shahriyar.dev"] # origins only will be able to connect through
-strict_mode = True # Wheather to allow clients from `allowed_origins`
+strict_mode = True # Wheather to allow clients from `allowed_origins` only
 
 async def notify_connection():
   CURRENT_USERS = USERS.copy()
@@ -62,7 +62,6 @@ async def sock(websocket, path):
   
   while True:
     try:
-      # print(websocket.request_headers['x-forwarded-for'])
       data = json.loads(await websocket.recv())
     except:
       try:
@@ -108,7 +107,6 @@ async def sock(websocket, path):
       })
     
     if event == 'typing_start':
-      # print(websocket.request_headers['x-forwarded-for'])
       channel = data['channel']
       identifier = data['identifier']
       
