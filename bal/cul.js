@@ -82,15 +82,15 @@ function wait(time) {
   });
 }
 
-function appendMessage(side, text, name, set) {
+function appendMessage(side, text, name, ec) {
   const messages = document.querySelector(".msger-chat");
   const msgHTML = `
       <div class="msg ${side}-msg">
-        <div class="msg-img" style="background-image: url(https://robohash.org/${name}?size=30x30&set=${set})"></div>
+        <div class="msg-img" style="background-image: url(https://robohash.org/${name}?size=30x30&set=set1)"></div>
   
-        <div class="msg-bubble">
+        <div class="msg-bubble ${ec}">
           <div class="msg-info">
-            <div class="msg-info-name">Anonymous</div>
+            <div class="msg-info-name">${name}</div>
             <div class="msg-info-time">${formatDate(new Date())}</div>
           </div>
   

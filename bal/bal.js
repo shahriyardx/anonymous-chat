@@ -94,12 +94,14 @@ function init_sock() {
         message = style(message);
 
         data["identifier"] == identifier ? (side = "right") : null;
-
+        let mention = `@${identifier.toLowerCase()}`
+        let ec = message.toLowerCase().includes(mention) ? 'mentioned' : ''
+  
         appendMessage(
           side,
           message,
           data["identifier"],
-          "set1"
+          ec
         );
 
         if (document.hasFocus() == false) {
