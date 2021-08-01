@@ -144,14 +144,18 @@ function reconnect_sock() {
 
 function send_message(message) {
   const not_messages = ["img:", "pd:", "color:", "rev:", "pd:", "ud:"]
+  let dont_send = false
   if (message !== "") {
-    
     not_messages.forEach(not_message => {
-      if (message == not_message) {
-        return
+      if (message.trim() == not_message) {
+        dont_send = true
       }
     })
-    
+
+    if (dont_send) {
+      return
+    }
+
     ws.send(
       JSON.stringify({
         event: "message",
@@ -171,7 +175,7 @@ form.addEventListener("submit", e => {
     return;
   }
   send_message(message);
-
+  form.message.focus()
   let frags = message.split(":");
 
   if (["color", "ud", "pd", "rev", "img"].includes(frags[0])) {
