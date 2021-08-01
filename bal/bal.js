@@ -18,9 +18,13 @@ let unread_count = 0;
 let channel = "";
 let sound = true;
 let typing_count = 0;
+let banned = false
+
+let ws_url = "wss://baler-soscket.shahriyardx.repl.co"
+// let ws_url = "wss://annon-sock.glitch.me"
 
 try {
-  ws = new WebSocket("wss://annon-sock.glitch.me");
+  ws = new WebSocket(ws_url);
   init_sock();
 } catch {
   reconnect_sock();
@@ -55,6 +59,10 @@ function init_sock() {
 
       case "con":
         identifier = data["identifier"];
+        break;
+      
+      case "banned":
+        banned = true
         break;
       
       case "typing":
@@ -118,8 +126,12 @@ function init_sock() {
 
 function reconnect_sock() {
   while (true) {
+    if (banned) {
+      cover.querySelector("p").textContent = "You are not allowed to connect to this socket"
+      break;
+    }
     try {
-      ws = new WebSocket("wss://annon-sock.glitch.me/");
+      ws = new WebSocket(ws_url);
       init_sock();
       break;
     } catch {
