@@ -6,6 +6,27 @@ import string
 
 
 class Socket:
+    """The socket class
+    
+    Parameters
+    -----------
+    host : `str`, `optional`
+        Where to start the websocket.
+        Default=localhost
+    port : `int`, `optional`
+        Port to listen.
+        Default=9897
+    strict_mode : `bool`, `optional`
+        Makes the websocket to close connection if ip is blacklisted 
+        or connection is from unknown origin.
+        Default=True
+    allowed_origins : `list`, `optional`
+        Origins that are allowed to make connection.
+        Default=[]
+    blacklisted_ip : `list`, `optional`
+        Ip's that are not allowed to make any connection.
+        Default=[]
+    """
     def __init__(
         self,
         host: str = "localhost",
@@ -24,7 +45,7 @@ class Socket:
         self.i_sock = {}
         self.typing_users = {}
 
-    async def notify_connection(self):
+    async def notify_connection(self) -> None:
         """Notify users on new connect or disconnect"""
         CURRENT_USERS = self.USERS.copy()
 
@@ -35,8 +56,15 @@ class Socket:
                 except:
                     pass
 
-    async def broadcast(self, data):
-        """Broadcast messsage to all connected client"""
+    async def broadcast(self, data: str) -> None:
+        """
+        Broadcast messsage to all connected client
+        
+        Parameters
+        -----------
+        data : `str`
+            Data to broadcast to all connected clients
+        """
         CURRENT_USERS = self.USERS.copy()
 
         if CURRENT_USERS:
@@ -150,8 +178,19 @@ class Socket:
             if message:
                 await self.broadcast(message)
 
-    def start(self, loop=None, run_forever=False):
-        """Starts the websocket server"""
+    def start(self, loop=None, run_forever: bool=True) -> None:
+        """
+        Starts the websocket server
+        
+        parameters
+        ----------
+        loop : `event loop`, `optional`
+            Loop to use for serving the websocket.
+            Default=None
+        run_forever : `bool`
+            Whether to run this loop forever or not.
+            Default=False
+        """
         print(f"Starting websocket server on port {self.port}")
   
         server = websockets.serve(self.sock, self.host, self.port)
@@ -163,6 +202,3 @@ class Socket:
 
         if run_forever:
             loop.run_forever()
-
-
-server = Socket(host="0.0.0.0", port=3000)
