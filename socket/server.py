@@ -150,7 +150,7 @@ class Socket:
             if message:
                 await self.broadcast(message)
 
-    def start(self, blacklisted_ip=[], loop=None, run_forever=False):
+    def start(self, loop=None, run_forever=False):
         """Starts the websocket server"""
         print(f"Starting websocket server on port {self.port}")
   
