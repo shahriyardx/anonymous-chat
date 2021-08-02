@@ -19,6 +19,7 @@ let channel = "";
 let sound = true;
 let typing_count = 0;
 let banned = false
+let is_typing = false
 
 let ws_url = "wss://baler-soscket.shahriyardx.repl.co"
 // let ws_url = "wss://annon-sock.glitch.me"
@@ -222,6 +223,7 @@ function debounce(callback, wait) {
 }
 
 form.message.addEventListener('keydown', debounce((e) => {
+  is_typing = false
   ws.send(
     JSON.stringify({
       event: "typing_stop",
@@ -238,6 +240,12 @@ form.message.addEventListener("keyup", e => {
   if (e.keyCode == 8) {
     return;
   }
+
+  if (is_typing) {
+    return
+  }
+
+  is_typing = true
 
   ws.send(
     JSON.stringify({
