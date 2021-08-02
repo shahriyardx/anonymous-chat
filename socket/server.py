@@ -4,146 +4,163 @@ import websockets
 import random
 import string
 
-USERS = set()
-messages_sent = 0
-sock_i = {}
-i_sock = {}
-typing_users = {}
-blacklisted_ip = ["144.172.120.190"] # ip you dont want to be a client
-allowed_origins = ["chat.shahriyar.dev"] # origins only will be able to connect through
-strict_mode = True # Wheather to allow clients from `allowed_origins` only
 
-async def notify_connection():
-  CURRENT_USERS = USERS.copy()
-  
-  if CURRENT_USERS:
-    for user in CURRENT_USERS:
-      try:
-        await user.send(json.dumps({'event': 'count', 'online_count': len(CURRENT_USERS), 'messages_sent': messages_sent}))
-      except:
-        pass
+class Socket:
+    def __init__(
+        self,
+        host: str = "localhost",
+        port: int = 9897,
+        strict_mode: bool = True,
+        allowed_origins: list = [],
+        blacklisted_ip: list = [],
+    ) -> None:
+        self.blacklisted_ip = blacklisted_ip
+        self.allowed_origins = allowed_origins
+        self.strict_mode = strict_mode
+        self.host = host
+        self.port = port
+        self.USERS = set()
+        self.sock_i = {}
+        self.i_sock = {}
+        self.typing_users = {}
+
+    async def notify_connection(self):
+        """Notify users on new connect or disconnect"""
+        CURRENT_USERS = self.USERS.copy()
+
+        if CURRENT_USERS:
+            for user in CURRENT_USERS:
+                try:
+                    await user.send(json.dumps({"event": "count", "online_count": len(CURRENT_USERS)}))
+                except:
+                    pass
+
+    async def broadcast(self, data):
+        """Broadcast messsage to all connected client"""
+        CURRENT_USERS = self.USERS.copy()
+
+        if CURRENT_USERS:
+            for user in CURRENT_USERS:
+                try:
+                    await user.send(data)
+                except:
+                    self.USERS.remove(user)
+                    await self.notify_connection()
+
+    async def sock(self, websocket, path):
+        """Method that handles websocket connection"""
+        if self.strict_mode:
+            if not websocket.origin:
+                return
+
+            origin = websocket.origin.strip("/").split("/")[-1]
+
+            if origin not in self.allowed_origins and self.allowed_origins:
+                await websocket.send(json.dumps({"event": "banned"}))
+                return await websocket.close()
+
+        if ("x-forwarded-for" in websocket.request_headers and 
+            websocket.request_headers["x-forwarded-for"].split(",")[0] in self.blacklisted_ip):
+            await websocket.close()
+            return
+
+        if websocket not in self.USERS:
+            self.USERS.add(websocket)
+            identifier = "".join(random.choices(string.ascii_uppercase, k=5))
+            self.sock_i[websocket] = identifier
+            self.i_sock[identifier] = websocket
+
+            await websocket.send(json.dumps({"event": "con", "identifier": identifier}))
+            await self.notify_connection()
+
+        while True:
+            try:
+                data = json.loads(await websocket.recv())
+            except:
+                try:
+                    self.USERS.remove(websocket)
+                    identifier = self.sock_i[websocket]
+                    current_typing_users = self.typing_users.copy()
+
+                    for key, val in current_typing_users.items():
+                        if identifier in val:
+                            self.typing_users[key].remove(identifier)
+
+                        message = json.dumps({
+                            "event": "typing",
+                            "channel": key,
+                            "users": list(self.typing_users[key]),
+                        })
+
+                        await self.broadcast(message)
+                except:
+                    pass
+                return await self.notify_connection()
+
+            event: str = data["event"]
+            message = None
+
+            if event == "oc":
+                message = json.dumps({"event": "oc", "count": len(self.USERS)})
+
+            if event == "message":
+                channel = data.get("channel")
+                if channel == None:
+                    return
+
+                message = json.dumps({
+                    "event": "message",
+                    "message": data["message"],
+                    "identifier": data["identifier"],
+                    "channel": channel if channel else "",
+                })
+
+            if event.startswith("typing_"):
+                try:
+                    typing_type = event.split("_")[1]
+                except:
+                    return
+                
+                channel = data["channel"]
+                identifier = data["identifier"]
+
+                if channel not in self.typing_users:
+                    self.typing_users[channel] = set()
+
+                if typing_type == "start":
+                    self.typing_users[channel].add(identifier)
+                
+                else:
+                    try:
+                        self.typing_users[channel].remove(identifier)
+                    except:
+                        pass
+                
+                message = json.dumps({
+                    "event": "typing",
+                    "channel": channel,
+                    "users": list(self.typing_users[channel]),
+                })
+
+            if message:
+                await self.broadcast(message)
+
+    def start(self, blacklisted_ip=[], allowed_origins=[], loop=None, run_forever=False):
+        """Starts the websocket server"""
+        print(f"Starting websocket server on port {self.port}")
         
-async def broadcast(data):
-  CURRENT_USERS = USERS.copy()
-  
-  if CURRENT_USERS:
-    for user in CURRENT_USERS:
-      try:
-        await user.send(data)
-      except:
-        USERS.remove(user)
-        await notify_connection()
+        self.blacklisted_ip = blacklisted_ip
+        self.allowed_origins = allowed_origins
 
-  
-async def sock(websocket, path):
-  if strict_mode:
-    if not websocket.origin:
-      return
-    origin = websocket.origin.strip("/").split("/")[-1]
-    if origin not in allowed_origins:
-      await websocket.send(json.dumps({'event': 'banned'}))
-      return await websocket.close()
-  
-  if websocket.request_headers['x-forwarded-for'].split(',')[0] in blacklisted_ip:
-    await websocket.close()
-    return
-  
-  if websocket not in USERS:
-    USERS.add(websocket)
-    identifier = ''.join(random.choices(string.ascii_uppercase, k=5))
-    sock_i[websocket] = identifier
-    i_sock[identifier] = websocket
-    
-    await websocket.send(json.dumps({
-      'event': 'con',
-      'identifier': identifier
-    }))
-    await notify_connection()
-  
-  while True:
-    try:
-      data = json.loads(await websocket.recv())
-    except:
-      try:
-        USERS.remove(websocket)
-        identifier = sock_i[websocket]
-        current_typing_users = typing_users.copy()
-        
-        for key, val in current_typing_users.items():
-          if identifier in val:
-            typing_users[key].remove(identifier)
-        
-          message = json.dumps({
-            'event': 'typing',
-            'channel': key,
-            'users': list(typing_users[key])
-          })
+        server = websockets.serve(self.sock, self.host, self.port)
 
-          await broadcast(message)
-      except Exception as e:
-        print(e)
-        pass
-      return await notify_connection()
-    
-    event = data['event']
-    message = None
-    
-    if event == 'oc':
-      message = json.dumps({
-        'event': 'oc',
-        'count': len(USERS)
-      })
-    
-    if event == 'message':
-      channel = data.get('channel')
-      if channel == None:
-        return
-      
-      message = json.dumps({
-        'event': 'message',
-        'message': data['message'],
-        'identifier': data['identifier'],
-        'channel': channel if channel else ''
-      })
-    
-    if event == 'typing_start':
-      channel = data['channel']
-      identifier = data['identifier']
-      
-      if channel not in typing_users:
-        typing_users[channel] = set()
-      
-      typing_users[channel].add(identifier)
-      
-      message = json.dumps({
-        'event': 'typing',
-        'channel': channel,
-        'users': list(typing_users[channel])
-      })
-    
-    if event == 'typing_stop':
-      channel = data['channel']
-      identifier = data['identifier']
-      
-      if channel not in typing_users:
-        typing_users[channel] = set()
-      
-      try:
-        typing_users[channel].remove(identifier)
-      except:
-        pass
-      
-      message = json.dumps({
-        'event': 'typing',
-        'channel': channel,
-        'users': list(typing_users[channel])
-      })
-    
-    if message:
-      await broadcast(message)
+        if not loop:
+            loop = asyncio.get_event_loop()
 
-server = websockets.serve(sock, '0.0.0.0', 3000)
+        loop.run_until_complete(server)
 
-asyncio.get_event_loop().run_until_complete(server)
-print("Started server")
-asyncio.get_event_loop().run_forever()
+        if run_forever:
+            loop.run_forever()
+
+
+server = Socket()
