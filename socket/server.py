@@ -49,6 +49,7 @@ class Socket:
 
     async def sock(self, websocket, path):
         """Method that handles websocket connection"""
+        send_banned = False
         if self.strict_mode:
             if not websocket.origin:
                 return
@@ -56,13 +57,17 @@ class Socket:
             origin = websocket.origin.strip("/").split("/")[-1]
 
             if origin not in self.allowed_origins and self.allowed_origins:
-                await websocket.send(json.dumps({"event": "banned"}))
-                return await websocket.close()
+                send_banned = True
+        
+        if not "x-forwarded-for" in websocket.request_headers:
+            send_banned = True
 
-        if ("x-forwarded-for" in websocket.request_headers and 
-            websocket.request_headers["x-forwarded-for"].split(",")[0] in self.blacklisted_ip):
-            await websocket.close()
-            return
+        if websocket.request_headers["x-forwarded-for"].split(",")[0] in self.blacklisted_ip:
+            send_banned = True
+        
+        if send_banned:
+            await websocket.send(json.dumps({"event": "banned"}))
+            return await websocket.close()
 
         if websocket not in self.USERS:
             self.USERS.add(websocket)
@@ -145,13 +150,10 @@ class Socket:
             if message:
                 await self.broadcast(message)
 
-    def start(self, blacklisted_ip=[], allowed_origins=[], loop=None, run_forever=False):
+    def start(self, blacklisted_ip=[], loop=None, run_forever=False):
         """Starts the websocket server"""
         print(f"Starting websocket server on port {self.port}")
-        
-        self.blacklisted_ip = blacklisted_ip
-        self.allowed_origins = allowed_origins
-
+  
         server = websockets.serve(self.sock, self.host, self.port)
 
         if not loop:
@@ -163,4 +165,4 @@ class Socket:
             loop.run_forever()
 
 
-server = Socket()
+server = Socket(host="0.0.0.0", port=3000)

@@ -1,4 +1,24 @@
+let emojis;
+fetch('https://chat.shahriyar.dev/assets/emojis.json').then(response => response.json()).then(data => emojis = data);
+
+
+function emoji_replace(message) {
+  const regexp = /:\w+:/gm
+  const matches = [...message.matchAll(regexp)]
+
+  matches.forEach(match => {
+    emoji = emojis[match[0].replaceAll(":", "")]
+    if (emoji) {
+      message = message.replace(match, emoji)
+    }
+  })
+
+  return message
+}
+
+
 function style(message) {
+   message = emoji_replace(message)
    var frags = message.split(":");
 
   switch (frags[0]) {
