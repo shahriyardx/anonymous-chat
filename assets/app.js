@@ -241,19 +241,27 @@ form.message.addEventListener("keyup", e => {
     return;
   }
 
-  if (is_typing) {
-    return
+  if (!is_typing) {
+    ws.send(
+      JSON.stringify({
+        event: "typing_start",
+        identifier: identifier,
+        channel: channel
+      })
+    );
+
+    is_typing = true
   }
 
-  is_typing = true
+  const regexp = /:\w+:/gm
+  const matches = [...text.matchAll(regexp)]
 
-  ws.send(
-    JSON.stringify({
-      event: "typing_start",
-      identifier: identifier,
-      channel: channel
-    })
-  );
+  matches.forEach(match => {
+    emoji = emojis[match[0].replaceAll(":", "")]
+    if (emoji) {
+      e.target.value = text.replace(match, emoji)
+    }
+  })
 
   switch (text) {
     case "color":
