@@ -1,5 +1,43 @@
+const settings = document.querySelector('.settings')
+const settings_form = document.querySelector('.settings-form')
+
 let emojis;
 fetch('https://chat.shahriyar.dev/assets/emojis.json').then(response => response.json()).then(data => emojis = data);
+
+
+function closePanel() {
+  settings.style.display = "none";
+}
+
+function showPanel() {
+  settings_form.name.value = identifier
+  settings_form.channel.value = channel
+  settings.style.display = "flex";
+}
+
+function saveInfo(e) {
+  const new_name = settings_form.name.value
+  const new_channel = settings_form.channel.value
+  
+  channel = new_channel
+
+  if(new_name !== "") {
+    if (new_name.length > 10) {
+      alert("Name is too big.")
+      return
+    } else {
+      identifier = new_name
+    }
+  } else {
+    alert("Name can't be empty.")
+    return
+  }
+
+  e.textContent = "Saved"
+  setTimeout(() => {
+    e.textContent = "Save"
+  }, 2000);
+}
 
 
 function emoji_replace(message) {

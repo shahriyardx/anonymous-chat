@@ -60,6 +60,7 @@ function init_sock() {
 
       case "con":
         identifier = data["identifier"];
+        settings_form.name.value = identifier;
         break;
       
       case "banned":

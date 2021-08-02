@@ -28,6 +28,39 @@
     <title>Annon Chat!</title>
   </head>
   <body>
+    <div class="settings">
+      <div class="panel">
+        <i class="fas fa-times" onclick="closePanel()"></i>
+        <div class="header">
+          Settings
+        </div>
+
+        <div class="body">
+          <form class="settings-form">
+            <div class="ig">
+              <label for="name">Name</label>
+              <div class="inputs">
+                <input type="text" name="name" id="name">
+                <p class="warn danger">Don't use real name.</p>
+              </div>
+            </div>
+
+            <div class="ig">
+              <label for="channel">Channel</label>
+              <div class="inputs">
+                <input type="text" name="channel" id="channel">
+                <p class="warn info">Send message to a custom channel. Keep blank for global messaging.</p>
+              </div>
+            </div>
+            
+          </form>
+        </div>
+        
+        <div class="footer">
+          <button class="save-button" onclick="saveInfo(this)">Save</button>
+        </div>
+      </div>
+    </div>
     <section class="msger">
       <div class="cover">
         <p>Connecting...</p>
@@ -41,7 +74,7 @@
         </div>
         <div class="msger-header-options">
           <p>
-            <i class="fas fa-volume-up volume" onclick="toggleSound()" style="cursor: pointer;"></i> &nbsp; Online : <span class="online">Loading...</span>
+            <i class="fas fa-cog" onclick="showPanel()" style="cursor: pointer;"></i> &nbsp; <i class="fas fa-volume-up volume" onclick="toggleSound()" style="cursor: pointer;"></i> &nbsp; Online : <span class="online">Loading...</span>
           </p>
         </div>
       </header>
