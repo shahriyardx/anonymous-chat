@@ -77,23 +77,20 @@ class Socket:
 
     async def sock(self, websocket, path):
         """Method that handles websocket connection"""
-        send_banned = False
         if self.strict_mode:
             if not websocket.origin:
                 return
-
+            
             origin = websocket.origin.strip("/").split("/")[-1]
-
             if origin not in self.allowed_origins and self.allowed_origins:
-                send_banned = True
+                await websocket.send(json.dumps({"event": "banned"}))
+                return await websocket.close()
         
         if not "x-forwarded-for" in websocket.request_headers:
-            send_banned = True
+            await websocket.send(json.dumps({"event": "banned"}))
+            return await websocket.close()
 
         if websocket.request_headers["x-forwarded-for"].split(",")[0] in self.blacklisted_ip:
-            send_banned = True
-        
-        if send_banned:
             await websocket.send(json.dumps({"event": "banned"}))
             return await websocket.close()
 
