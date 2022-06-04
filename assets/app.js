@@ -21,10 +21,8 @@ let typing_count = 0;
 let banned = false;
 let is_typing = false;
 
-let ws_url = "wss://baler-soscket.shahriyardx.repl.co";
-// let ws_url = "wss://annon-sock.glitch.me"
-
-fetch("wss://baler-soscket.shahriyardx.repl.co");
+let ws_url = "wss://ws-chat.shahriyardx.repl.co";
+fetch("https://ws-chat.shahriyardx.repl.co");
 
 try {
   ws = new WebSocket(ws_url);
