@@ -2,9 +2,9 @@ const online_span = document.querySelector(".online");
 const form = document.querySelector(".msger-inputarea");
 const cover = document.querySelector(".cover");
 const google_event = new Audio("https://cdn.shahriyar.dev/google_event.mp3");
-const incoming= new Audio("https://cdn.shahriyar.dev/incoming.mp3");
+const incoming = new Audio("https://cdn.shahriyar.dev/incoming.mp3");
 const outgoing = new Audio("https://cdn.shahriyar.dev/outgoing.mp3");
-const typing = document.querySelector('.typing')
+const typing = document.querySelector(".typing");
 
 google_event.volume = 0.2;
 incoming.volume = 0.2;
@@ -18,11 +18,13 @@ let unread_count = 0;
 let channel = "";
 let sound = true;
 let typing_count = 0;
-let banned = false
-let is_typing = false
+let banned = false;
+let is_typing = false;
 
-let ws_url = "wss://baler-soscket.shahriyardx.repl.co"
+let ws_url = "wss://baler-soscket.shahriyardx.repl.co";
 // let ws_url = "wss://annon-sock.glitch.me"
+
+fetch("wss://baler-soscket.shahriyardx.repl.co");
 
 try {
   ws = new WebSocket(ws_url);
@@ -32,24 +34,25 @@ try {
 }
 
 function init_sock() {
-  ws.addEventListener("open", e => {
+  ws.addEventListener("open", (e) => {
     cover.classList.add("hidden");
 
     ws.send(
       JSON.stringify({
-        event: "oc"
+        event: "oc",
       })
     );
   });
 
-  ws.addEventListener("close", e => {
-    cover.querySelector("p").textContent = "Websocket disconnected. Reconnecting...";
+  ws.addEventListener("close", (e) => {
+    cover.querySelector("p").textContent =
+      "Websocket disconnected. Reconnecting...";
     cover.classList.remove("hidden");
     wait(5000);
     reconnect_sock();
   });
 
-  ws.addEventListener("message", e => {
+  ws.addEventListener("message", (e) => {
     let data = JSON.parse(e.data);
 
     switch (data["event"]) {
@@ -62,32 +65,32 @@ function init_sock() {
         identifier = data["identifier"];
         settings_form.name.value = identifier;
         break;
-      
+
       case "banned":
-        banned = true
+        banned = true;
         break;
-      
+
       case "typing":
         if (data["channel"] != channel) {
-          return
+          return;
         }
-        
-        typing_count = data["users"].length
-        users = data["users"]
-        if(users.includes(identifier) && typing_count == 1) {
-          typing.textContent = ""
+
+        typing_count = data["users"].length;
+        users = data["users"];
+        if (users.includes(identifier) && typing_count == 1) {
+          typing.textContent = "";
         } else if (typing_count == 0) {
-          typing.textContent = ""
+          typing.textContent = "";
         } else {
-          users.includes(identifier) ? typing_count -= 1 : null
-          let is_are = typing_count > 1 ? "are" : "is"
-          typing.textContent = `${typing_count} people ${is_are} typing...`
+          users.includes(identifier) ? (typing_count -= 1) : null;
+          let is_are = typing_count > 1 ? "are" : "is";
+          typing.textContent = `${typing_count} people ${is_are} typing...`;
         }
-        
+
         break;
       case "message":
         if (data["channel"] != channel) {
-          return
+          return;
         }
 
         let message = data["message"].replace(/(<([^>]+)>)/gi, "");
@@ -96,15 +99,10 @@ function init_sock() {
         message = style(message);
 
         data["identifier"] == identifier ? (side = "right") : null;
-        let mention = `@${identifier.toLowerCase()}`
-        let ec = message.toLowerCase().includes(mention) ? 'mentioned' : ''
-  
-        appendMessage(
-          side,
-          message,
-          data["identifier"],
-          ec
-        );
+        let mention = `@${identifier.toLowerCase()}`;
+        let ec = message.toLowerCase().includes(mention) ? "mentioned" : "";
+
+        appendMessage(side, message, data["identifier"], ec);
 
         if (document.hasFocus() == false) {
           if (unread_count == 0) {
@@ -131,7 +129,8 @@ function init_sock() {
 function reconnect_sock() {
   while (true) {
     if (banned) {
-      cover.querySelector("p").textContent = "You are not allowed to connect to this socket"
+      cover.querySelector("p").textContent =
+        "You are not allowed to connect to this socket";
       break;
     }
     try {
@@ -145,17 +144,17 @@ function reconnect_sock() {
 }
 
 function send_message(message) {
-  const not_messages = ["img:", "pd:", "color:", "rev:", "pd:", "ud:"]
-  let dont_send = false
+  const not_messages = ["img:", "pd:", "color:", "rev:", "pd:", "ud:"];
+  let dont_send = false;
   if (message !== "") {
-    not_messages.forEach(not_message => {
+    not_messages.forEach((not_message) => {
       if (message.trim() == not_message) {
-        dont_send = true
+        dont_send = true;
       }
-    })
+    });
 
     if (dont_send) {
-      return
+      return;
     }
 
     ws.send(
@@ -163,13 +162,13 @@ function send_message(message) {
         event: "message",
         message: message,
         identifier: identifier,
-        channel: channel
+        channel: channel,
       })
     );
   }
 }
 
-form.addEventListener("submit", e => {
+form.addEventListener("submit", (e) => {
   e.preventDefault();
   let message = form.message.value;
 
@@ -177,7 +176,7 @@ form.addEventListener("submit", e => {
     return;
   }
   send_message(message);
-  form.message.focus()
+  form.message.focus();
   let frags = message.split(":");
 
   if (["color", "ud", "pd", "rev", "img"].includes(frags[0])) {
@@ -210,7 +209,7 @@ form.addEventListener("submit", e => {
   }
 });
 
-window.addEventListener("focus", e => {
+window.addEventListener("focus", (e) => {
   document.title = default_title;
   unread_count = 0;
 });
@@ -218,24 +217,28 @@ window.addEventListener("focus", e => {
 function debounce(callback, wait) {
   let timeout;
   return (...args) => {
-      clearTimeout(timeout);
-      timeout = setTimeout(function () { callback.apply(this, args); }, wait);
+    clearTimeout(timeout);
+    timeout = setTimeout(function () {
+      callback.apply(this, args);
+    }, wait);
   };
 }
 
-form.message.addEventListener('keydown', debounce((e) => {
-  is_typing = false
-  ws.send(
-    JSON.stringify({
-      event: "typing_stop",
-      identifier: identifier,
-      channel: channel
-    })
-  );
-}, 2000))
+form.message.addEventListener(
+  "keydown",
+  debounce((e) => {
+    is_typing = false;
+    ws.send(
+      JSON.stringify({
+        event: "typing_stop",
+        identifier: identifier,
+        channel: channel,
+      })
+    );
+  }, 2000)
+);
 
-
-form.message.addEventListener("keyup", e => {
+form.message.addEventListener("keyup", (e) => {
   let text = e.target.value;
 
   if (e.keyCode == 8) {
@@ -247,22 +250,22 @@ form.message.addEventListener("keyup", e => {
       JSON.stringify({
         event: "typing_start",
         identifier: identifier,
-        channel: channel
+        channel: channel,
       })
     );
 
-    is_typing = true
+    is_typing = true;
   }
 
-  const regexp = /:\w+:/gm
-  const matches = [...text.matchAll(regexp)]
+  const regexp = /:\w+:/gm;
+  const matches = [...text.matchAll(regexp)];
 
-  matches.forEach(match => {
-    emoji = emojis[match[0].replaceAll(":", "")]
+  matches.forEach((match) => {
+    emoji = emojis[match[0].replaceAll(":", "")];
     if (emoji) {
-      e.target.value = text.replace(match, emoji)
+      e.target.value = text.replace(match, emoji);
     }
-  })
+  });
 
   switch (text) {
     case "color":
